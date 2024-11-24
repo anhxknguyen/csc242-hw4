@@ -30,14 +30,11 @@ def main():
             (vars,domains) = read.vars_and_domains(doc)
             (tables,parents) = read.tables_and_parents(doc)
             #Handle Approximate Inference
-            print('Approximate Inference')
-            
-            # print('Query Variable is:', queryVariable)
-            # print('Evidence Variables are:', evidenceVariablesMap)
-            # print('Variables are:', vars)
-            # print('Domains are:', domains)
-            # print('Parents are:', parents)
-            # print('Tables are:', tables)
+            print('Approximate Inference')        
+            print('Query Variable is:', queryVariable)
+            print('Evidence Variables are:', evidenceVariablesMap)
+            print('Number of Samples:', samples)
+
         except ValueError:
             xmlFile = firstArg
             if not os.path.isfile(xmlFile) or not xmlFile.endswith('.xml'):
@@ -50,14 +47,12 @@ def main():
             doc = xml.dom.minidom.parse(xmlFile)
             (vars,domains) = read.vars_and_domains(doc)
             (tables,parents) = read.tables_and_parents(doc)
+
             #Handle Exact Inference
             print("Exact Inference")
-            # print('Query Variable is:', queryVariable)
-            # print('Evidence Variables are:', evidenceVariablesMap)
-            # print('Variables are:', vars)
-            # print('Domains are:', domains)
-            # print('Parents are:', parents)
-            # print('Tables are:', tables)
+            print('Query Variable is:', queryVariable)
+            print('Evidence Variables are:', evidenceVariablesMap)
+
     except IndexError:
         print("Invalid number of arguments. Make sure you have a value assigned for each evidence variable.") 
         return
