@@ -3,10 +3,10 @@ import xml.dom.minidom
 import sys
 import os
 
-def exact_inference():
+def exactInference():
     pass
 
-def approximate_inference():
+def approximateInference():
     pass
 
 def main():
