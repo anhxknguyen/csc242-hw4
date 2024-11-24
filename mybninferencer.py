@@ -8,39 +8,44 @@ import pprint
 class Bayesian:
     def __init__(self, xmlFile):
         self.nodes = {}
+        self.var_list = []
 
         doc = xml.dom.minidom.parse(xmlFile)
         (vars,domains) = read.vars_and_domains(doc)
         (tables,parents) = read.tables_and_parents(doc)
 
-        print('VARS: ', vars)
-        print('DOMAINS: ', domains)
-        print("TABLES:", tables)
-        print("PARENTS:", parents)
+        # print('VARS: ', vars)
+        # print('DOMAINS: ', domains)
+        # print("TABLES:", tables)
+        # print("PARENTS:", parents)
 
-        for var in vars:
-            my_parents = parents[var]
-            my_cpt = {}
+        self.var_list = vars
 
-            if not my_parents:
-                for i, value in enumerate(domains[var]):
-                    my_cpt[value] = tables[var][i]
+        for var in self.var_list:
+            p = parents[var] # parents of variable
+            d = domains[var] # domain of variable
+            cpt = {}
+
+            if not parents[var]:
+                for i, value in enumerate(d):
+                    cpt[value] = tables[var][i]
             else:
-                parent_combos = self.parent_combinations(my_parents, domains)
+                parent_combos = self.parent_combinations(p, domains)
                 for i, combo in enumerate(parent_combos):
-                    my_cpt[combo] = {}
-                    index =  len(domains[var]) * i 
-                    for j, value in enumerate(domains[var]):
-                        my_cpt[combo][value] = tables[var][index + j]
+                    cpt[combo] = {}
+                    index =  len(d) * i 
+                    for j, value in enumerate(d):
+                        cpt[combo][value] = tables[var][index + j]
 
-            self.add_node(var, my_parents, my_cpt)
+            self.add_node(var, d, p, cpt)
 
     def parent_combinations(self, parents, domains):
         parent_domains = [domains[parent] for parent in parents]
         return list(product(*parent_domains))
     
-    def add_node(self, name, parents, cpt):
+    def add_node(self, name, domain, parents, cpt):
         self.nodes[name] = {
+            "domain": domain,
             "parents": parents,
             "cpt" : cpt
         }
@@ -49,14 +54,60 @@ class Bayesian:
         pp = pprint.PrettyPrinter(indent=4)
         for node, data in self.nodes.items():
             print(f"Node: {node}")
+            print(f"  Domain: {data['domain']}")
             print(f"  Parents: {data['parents']}")
             print(f"  CPT: ")
             pp.pprint(data['cpt'])  # Use pprint to display the CPT
             print()
 
-def exactInference(queryVariable, evidence, bn: Bayesian):
+    def get_probability(self, var, value, evidence):
+        node = self.nodes[var]
+        parents = node['parents']
+        cpt = node['cpt']
+
+        if not parents:
+            return cpt[value]
+        
+        parent_vals = tuple(evidence[parent] for parent in parents)
+        return cpt[parent_vals][value]
+
+# query : query variable
+# evidence : evidence map
+# bn : bayesian net
+def exactInference(query, evidence: dict, bn: Bayesian):
     print("Exact Inference")
-    pass
+
+    vars = bn.var_list
+    query_dist = {}
+    for value in bn.nodes[query]['domain']:
+        extended_evidence = evidence.copy()
+        extended_evidence[query] = value
+        query_dist[value] = enumerate_all(vars, extended_evidence, bn)
+
+    total = sum(query_dist.values())
+    for value in query_dist:
+        query_dist[value] /= total
+
+    print(query_dist)
+
+def enumerate_all(vars: list, evidence: dict, bn: Bayesian):
+    if not vars:
+        return 1.0
+    
+    var = vars[0]
+    rest = vars[1:]
+
+    if var in evidence:
+        prob = bn.get_probability(var, evidence[var], evidence)
+        return prob * enumerate_all(rest, evidence, bn)
+    else:
+        total = 0
+        for value in bn.nodes[var]['domain']:
+            extended_evidence = evidence.copy()
+            extended_evidence[var] = value
+            prob = bn.get_probability(var, value, extended_evidence)
+            total += prob * enumerate_all(rest, extended_evidence, bn)
+        return total
 
 
 def approximateInference(queryVariable, evidence, bn: Bayesian, samples: int):
