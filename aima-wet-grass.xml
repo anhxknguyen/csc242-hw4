@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="US-ASCII"?>
 <!--
-File: aima-alarm.xml
+
+File: aima-wet-grass.xml
 Creator: George Ferguson
-Created: Tue Mar 27 19:24:30 2012
-Time-stamp: <Wed Mar 28 14:22:02 EDT 2012 ferguson>
+Created: Wed Mar 28 14:20:35 2012
+Time-stamp: <Wed Mar 28 14:25:41 EDT 2012 ferguson>
 
-    AIMA burglar alarm example (Figure 14.2)
+    AIMA wet grass example (Figure 14.12)
 
-    P(B|j,m) = \alpha <0.00059224, 0.0014919> = <0.284, 0.716>
--->
+ -->
 
 <!-- DTD for the XMLBIF 0.3 format -->
 <!DOCTYPE BIF [
@@ -28,87 +28,75 @@ Time-stamp: <Wed Mar 28 14:22:02 EDT 2012 ferguson>
 
 <BIF VERSION="0.3">
 <NETWORK>
-<NAME>AIMA-Burglar-Alarm</NAME>
+<NAME>AIMA-Wet-Grass</NAME>
 
 <!-- Variables -->
 
 <VARIABLE TYPE="nature">
-	<NAME>B</NAME>
+	<NAME>C</NAME>
 	<OUTCOME>true</OUTCOME>
 	<OUTCOME>false</OUTCOME>
 </VARIABLE>
 
 <VARIABLE TYPE="nature">
-	<NAME>E</NAME>
+	<NAME>S</NAME>
 	<OUTCOME>true</OUTCOME>
 	<OUTCOME>false</OUTCOME>
 </VARIABLE>
 
 <VARIABLE TYPE="nature">
-	<NAME>A</NAME>
+	<NAME>R</NAME>
 	<OUTCOME>true</OUTCOME>
 	<OUTCOME>false</OUTCOME>
 </VARIABLE>
 
 <VARIABLE TYPE="nature">
-	<NAME>J</NAME>
-	<OUTCOME>true</OUTCOME>
-	<OUTCOME>false</OUTCOME>
-</VARIABLE>
-
-<VARIABLE TYPE="nature">
-	<NAME>M</NAME>
+	<NAME>W</NAME>
 	<OUTCOME>true</OUTCOME>
 	<OUTCOME>false</OUTCOME>
 </VARIABLE>
 
 <!-- Probability distributions -->
 
-<!-- P(B) -->
+<!-- P(C) -->
 <DEFINITION>
-	<FOR>B</FOR>
-	<TABLE>0.001 0.999</TABLE>
+	<FOR>C</FOR>
+	<TABLE>0.5 0.5</TABLE>
 </DEFINITION>
 
-<!-- P(E) -->
+<!-- P(S|C) -->
 <DEFINITION>
-	<FOR>E</FOR>
-	<TABLE>0.002 0.998</TABLE>
-</DEFINITION>
-
-<!-- P(A|B,E) -->
-<DEFINITION>
-	<FOR>A</FOR>
-	<GIVEN>B</GIVEN>
-	<GIVEN>E</GIVEN>
+	<FOR>S</FOR>
+	<GIVEN>C</GIVEN>
 	<TABLE>
-	  <!--            A     !A -->
-	  <!-- B E -->   0.95  0.05
-	  <!-- B !E -->  0.94  0.06
-	  <!-- !B E -->  0.29  0.71
-	  <!-- !B !E --> 0.001 0.999
+	  <!--          S    !S -->
+	  <!-- C -->   0.1   0.9
+	  <!-- !C -->  0.5   0.5
 	</TABLE>
 </DEFINITION>
 
-<!-- P(J|A) -->
+<!-- P(R|C) -->
 <DEFINITION>
-	<FOR>J</FOR>
-	<GIVEN>A</GIVEN>
+	<FOR>R</FOR>
+	<GIVEN>C</GIVEN>
 	<TABLE>
-	  <!--          J     !J -->
-	  <!-- A -->   0.90  0.10
-	  <!-- !A -->  0.05  0.95
+	  <!--          R    !R -->
+	  <!-- C -->   0.8   0.2
+	  <!-- !C -->  0.2   0.8
 	</TABLE>
 </DEFINITION>
 
-<!-- P(M|A) -->
+<!-- P(W|S,R) -->
 <DEFINITION>
-	<FOR>M</FOR>
-	<GIVEN>A</GIVEN>
+	<FOR>W</FOR>
+	<GIVEN>S</GIVEN>
+	<GIVEN>R</GIVEN>
 	<TABLE>
-	  <!--          M     !M -->
-	  <!-- A -->   0.70  0.30
-	  <!-- !A -->  0.01  0.99
+	  <!--            W     !W -->
+	  <!-- S R -->   0.99  0.01
+	  <!-- S !R -->  0.90  0.1
+	  <!-- !S R -->  0.90  0.1
+	  <!-- !S !R --> 0.0   1.0
 	</TABLE>
 </DEFINITION>
 

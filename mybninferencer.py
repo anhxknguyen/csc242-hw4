@@ -24,8 +24,7 @@ def main():
             xmlFile = remainingArgs[0]
             if not os.path.isfile(xmlFile) or not xmlFile.endswith('.xml'):
                 print("The file must be an XML file.")
-                return
-            
+                return   
             
             queryVariable = remainingArgs[1]
             evidenceVariablesMap = {}
@@ -38,6 +37,8 @@ def main():
             doc = xml.dom.minidom.parse(xmlFile)
             (vars,domains) = read.vars_and_domains(doc)
             (tables,parents) = read.tables_and_parents(doc)
+            print("tables", tables)
+            print("parents", parents)
 
             #Handle Approximate Inference
             print('Approximate Inference')        
