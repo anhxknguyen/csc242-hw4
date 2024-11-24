@@ -3,6 +3,8 @@ import xml.dom.minidom
 import sys
 import os
 from itertools import product
+from collections import defaultdict
+import random
 import pprint
 
 class Bayesian:
@@ -14,22 +16,19 @@ class Bayesian:
         (vars,domains) = read.vars_and_domains(doc)
         (tables,parents) = read.tables_and_parents(doc)
 
-        # print('VARS: ', vars)
-        # print('DOMAINS: ', domains)
-        # print("TABLES:", tables)
-        # print("PARENTS:", parents)
-
         self.var_list = vars
 
         for var in self.var_list:
-            p = parents[var] # parents of variable
+            p = () # parents of variable
             d = domains[var] # domain of variable
             cpt = {}
 
             if not parents[var]:
+                cpt[()] = {}
                 for i, value in enumerate(d):
-                    cpt[value] = tables[var][i]
+                    cpt[()][value] = tables[var][i]
             else:
+                p = parents[var]
                 parent_combos = self.parent_combinations(p, domains)
                 for i, combo in enumerate(parent_combos):
                     cpt[combo] = {}
@@ -60,21 +59,21 @@ class Bayesian:
             pp.pprint(data['cpt'])  # Use pprint to display the CPT
             print()
 
+    # P (A | parents(A))
     def get_probability(self, var, value, evidence):
         node = self.nodes[var]
         parents = node['parents']
         cpt = node['cpt']
-
-        if not parents:
-            return cpt[value]
         
+        # print(evidence)
         parent_vals = tuple(evidence[parent] for parent in parents)
+        # print(parent_vals)
         return cpt[parent_vals][value]
 
 # query : query variable
 # evidence : evidence map
 # bn : bayesian net
-def exactInference(query, evidence: dict, bn: Bayesian):
+def exactInference(query: str, evidence: dict, bn: Bayesian):
     print("Exact Inference")
 
     vars = bn.var_list
@@ -109,12 +108,44 @@ def enumerate_all(vars: list, evidence: dict, bn: Bayesian):
             total += prob * enumerate_all(rest, extended_evidence, bn)
         return total
 
-
-def approximateInference(queryVariable, evidence, bn: Bayesian, samples: int):
+def approximateInference(query: str, evidence: dict, bn: Bayesian, num_samples: int):
     print('Approximate Inference')
-    print('NUM SAMPLES:', samples)
-    pass
+    print('NUM SAMPLES:', num_samples)
 
+    bn.print_nodes
+
+    query_dist = {}
+    for value in bn.nodes[query]['domain']:
+        query_dist[value] = 0.0
+
+    for _ in range(num_samples):
+        sample, weight = likelihoodWeighting(evidence, bn)
+        query_dist[sample[query]] += weight 
+    
+    total = sum(query_dist.values())
+    for value in query_dist:
+        query_dist[value] /= total
+
+    print(query_dist)
+
+def likelihoodWeighting(evidence: dict, bn: Bayesian):
+    # bn.print_nodes()
+
+    sample = {}
+    weight = 1.0
+
+    for var in bn.var_list:
+        # print(f"Variable: {var}");
+        if var in evidence:
+            sample[var] = evidence[var]
+            prob = bn.get_probability(var, sample[var], sample)
+            weight *= prob
+        else:
+            true_prob = bn.get_probability(var, 'true', sample)
+            sample[var] = 'true' if (random.random() < true_prob) else 'false'
+
+    return sample, weight
+                
 def main():
     try:
         firstArg = sys.argv[1]
@@ -142,10 +173,7 @@ def main():
             #Parse XML File and get variables/domains and tables/parents
             bn = Bayesian(xmlFile)
             #Handle Approximate Inference
-            print('Approximate Inference')
-            print('NUM SAMPLES:', samples)
-
-
+            approximateInference(queryVariable, evidenceVariablesMap, bn, samples)
 
         except ValueError:
             #Get XML file. If not XML file, print error message.
