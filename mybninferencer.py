@@ -37,14 +37,13 @@ def main():
             doc = xml.dom.minidom.parse(xmlFile)
             (vars,domains) = read.vars_and_domains(doc)
             (tables,parents) = read.tables_and_parents(doc)
-            print("tables", tables)
-            print("parents", parents)
-
             #Handle Approximate Inference
             print('Approximate Inference')        
-            print('Query Variable is:', queryVariable)
-            print('Evidence Variables are:', evidenceVariablesMap)
-            print('Number of Samples:', samples)
+            print('QUERY VARIABLE:', queryVariable)
+            print('EVIDENCE VARIABLES:', evidenceVariablesMap)
+            print('NUM SAMPLES:', samples)
+            print("TABLES:", tables)
+            print("PARENTS:", parents)
 
         except ValueError:
             #Get XML file. If not XML file, print error message.
@@ -67,8 +66,10 @@ def main():
 
             #Handle Exact Inference
             print("Exact Inference")
-            print('Query Variable is:', queryVariable)
-            print('Evidence Variables are:', evidenceVariablesMap)
+            print('QUERY VARIABLE:', queryVariable)
+            print('EVIDENCE VARIABLES:', evidenceVariablesMap)
+            print("TABLES:", tables)
+            print("PARENTS:", parents)
 
     except IndexError:
         print("Invalid number of arguments. Make sure you have a value assigned for each evidence variable.") 
