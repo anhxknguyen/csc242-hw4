@@ -169,7 +169,7 @@ def main():
             bn.print_nodes()
 
             #Handle Exact Inference
-            exactInference(queryVariable, evidenceVariablesMap, bn);
+            exactInference(queryVariable, evidenceVariablesMap, bn)
 
     except IndexError:
         print("Invalid number of arguments. Make sure you have a value assigned for each evidence variable.") 
