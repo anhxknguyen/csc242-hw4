@@ -61,7 +61,6 @@ def main():
         else:
             print("Evidence: None")
         bn.print_nodes()
-    
 
     if args.inference_type == "approx":
         approximateInference(args.query, evidence_dict, bn, args.samples)
@@ -101,6 +100,8 @@ class Bayesian:
                     cpt[combo][value] = tables[var][index + j]
 
             self.add_node(var, d, p, cpt)
+
+        self.var_list = topological_sort(self.nodes)
         
         # print("Parsed Bayesian: ")
         # self.print_nodes()
@@ -156,6 +157,8 @@ def enumerate_all(vars: list, evidence: dict, bn: Bayesian):
     var = vars[0]
     rest = vars[1:]
 
+    print(var)
+    print(evidence)
     if var in evidence:
         prob = bn.get_probability(var, evidence[var], evidence)
         return prob * enumerate_all(rest, evidence, bn)
@@ -164,6 +167,7 @@ def enumerate_all(vars: list, evidence: dict, bn: Bayesian):
         for value in bn.nodes[var]['domain']:
             extended_evidence = evidence.copy()
             extended_evidence[var] = value
+            print(f"extended evidence: {extended_evidence}");
             prob = bn.get_probability(var, value, extended_evidence)
             total += prob * enumerate_all(rest, extended_evidence, bn)
         return total
@@ -206,6 +210,32 @@ def normalize(query:str , query_dist: dict):
 
     for key, value in query_dist.items():
         print(f"\t{key}: {value}")
+
+# chatgpt implemented algorithm
+def topological_sort(nodes):
+    # Step 1: Build a dependency graph and in-degree count
+    in_degree = {node: 0 for node in nodes}
+    adjacency_list = {node: [] for node in nodes}
+
+    for node, details in nodes.items():
+        for parent in details["parents"]:
+            adjacency_list[parent].append(node)
+            in_degree[node] += 1
+
+    # Step 2: Perform topological sorting using Kahn's Algorithm
+    queue = [node for node, degree in in_degree.items() if degree == 0]
+    sorted_order = []
+
+    while queue:
+        current = queue.pop(0)
+        sorted_order.append(current)
+
+        for child in adjacency_list[current]:
+            in_degree[child] -= 1
+            if in_degree[child] == 0:
+                queue.append(child)
+
+    return sorted_order
 
 if __name__ == "__main__":
     main()
