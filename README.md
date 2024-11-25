@@ -48,3 +48,18 @@ Basically, we followed the pseudocode in the textbook but implemented a topologi
 For our Inference by Approximation algorithm, we used the Likelihood Weighting sampling method to generate samples for our data.
 We generate cases from the top down, and when presented with a node already determined by the evidence, we take that node with the evidence value, and then multiply the weight by the chance of that value.
 
+### Experimental Work
+
+Please keep in mind the number of samples is dependent on RNG, so it might be different during different tests.
+
+aima-alarm.xml: 480 samples
+Query: P(B | A)
+Input: ./mybninferencer.py aima-alarm.xml converge B -e A true
+
+aima-wet-grass.xml: 13 samples
+Query: P(R | W)
+Input: ./mybninferencer.py aima-wet-grass.xml converge R -e W true
+
+dog-problem.xml: 52 samples
+Query: P(light-on | hear-bark)
+Input: ./mybninferencer.py dog-problem.xml converge light-on -e hear-bark true
