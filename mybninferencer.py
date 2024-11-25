@@ -69,6 +69,27 @@ def main():
     if args.inference_type == "exact":
         exactInference(args.query, evidence_dict, bn)
 
+    if args.inference_type == "converge":
+        exact = exactInference(args.query, evidence_dict, bn)
+        exactTrueProb = exact['true']
+        exactFalseProb = exact['false']
+
+        sample = 1
+        while True:
+            approx = approximateInference(args.query, evidence_dict, bn, sample)
+            approxTrueProb = approx['true']
+            approxFalseProb = approx['false']
+            error = abs(approxTrueProb - exactTrueProb)
+            if error < 0.01:
+                break
+            sample += 1
+        print("Number of samples needed for approximate to reach 1% error: ", sample)
+        print("Exact Probability of True: ", exactTrueProb)
+        print("Exact Probability of False: ", exactFalseProb)
+        print("Approximate Probability of True: ", approxTrueProb)
+        print("Approximate Probability of True: ", approxFalseProb)
+
+
 class Bayesian:
     def __init__(self, xmlFile):
         self.nodes = {}
@@ -147,7 +168,7 @@ def exactInference(query: str, evidence: dict, bn: Bayesian):
         extended_evidence[query] = value
         query_dist[value] = enumerate_all(vars, extended_evidence, bn)
 
-    normalize(query, query_dist)
+    return normalize(query, query_dist)
 
 def enumerate_all(vars: list, evidence: dict, bn: Bayesian):
     if not vars:
@@ -180,7 +201,7 @@ def approximateInference(query: str, evidence: dict, bn: Bayesian, num_samples: 
         sample, weight = likelihoodWeighting(evidence, bn)
         query_dist[sample[query]] += weight 
     
-    normalize(query, query_dist)
+    return normalize(query, query_dist)
 
 def likelihoodWeighting(evidence: dict, bn: Bayesian):
     sample = {}
@@ -206,6 +227,8 @@ def normalize(query:str , query_dist: dict):
 
     for key, value in query_dist.items():
         print(f"\t{key}: {value}")
+    
+    return query_dist
 
 if __name__ == "__main__":
     main()
